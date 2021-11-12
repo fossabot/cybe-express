@@ -11,6 +11,6 @@
   "main": "index.js",
   "repository": "https://github.com/cybemachine/cybe-express.git",
   "author": "cybemachine <cybemachine142@gmail.com>",
-  "license": "MIT",
+  "license": "see license in dbad.md",
   "private": false
 }
