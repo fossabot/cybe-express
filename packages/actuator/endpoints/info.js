@@ -30,6 +30,7 @@ module.exports = Info
 
 function getBuild (options) {
   const packageJson = getPackageJsonFile()
+  console.log(packageJson)
 
   let build
   if (packageJson !== undefined) {
@@ -47,13 +48,14 @@ function getPackageJsonFile () {
   let packageJson = cache.get('packageJson')
   if (packageJson === undefined) {
     try {
-      const packageFile = fs.readFileSync('./package.json', 'utf8')
+      const packageFile = fs.readFileSync('../../../package.json', 'utf8')
       packageJson = JSON.parse(packageFile)
       cache.set('packageJson', packageJson)
     } catch (err) {
       // Error getting and parsing package.json
     }
   }
+
   return packageJson
 }
 

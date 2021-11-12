@@ -4,5 +4,13 @@
     "moment": "^2.29.1",
     "sequelize": "^6.9.0",
     "util": "^0.12.4"
-  }
+  },
+  "name": "cybe-express",
+  "version": "0.0.1",
+  "description": "cybe-express a node module inspired by express",
+  "main": "index.js",
+  "repository": "https://github.com/cybemachine/cybe-express.git",
+  "author": "cybemachine <cybemachine142@gmail.com>",
+  "license": "MIT",
+  "private": false
 }
