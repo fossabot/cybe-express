@@ -8,14 +8,14 @@ let buildOptions;
 let cache;
 
 class Info {
-  constructor (options = {}, contextCache) {
+  constructor(options = {}, contextCache) {
     gitMode = options.gitMode
     dateFormat = options.dateFormat
     buildOptions = options.buildOptions
     cache = contextCache
   }
 
-  route (req, res) {
+  route(req, res) {
     const build = getBuild(buildOptions)
     const git = getGit(gitMode, dateFormat)
 
@@ -28,9 +28,8 @@ class Info {
 
 module.exports = Info
 
-function getBuild (options) {
+function getBuild(options) {
   const packageJson = getPackageJsonFile()
-  console.log(packageJson)
 
   let build
   if (packageJson !== undefined) {
@@ -44,29 +43,29 @@ function getBuild (options) {
   return build
 }
 
-function getPackageJsonFile () {
-  let packageJson = cache.get('packageJson')
+function getPackageJsonFile() {
+  var packageJson = cache.get('packageJson')
   if (packageJson === undefined) {
     try {
-      const packageFile = fs.readFileSync('../../../package.json', 'utf8')
+      const packageFile = fs.readFileSync(`${process.cwd()}/package.json`, 'utf8')
+
       packageJson = JSON.parse(packageFile)
       cache.set('packageJson', packageJson)
     } catch (err) {
       // Error getting and parsing package.json
     }
   }
-
   return packageJson
 }
 
-function getGit (infoGitMode, dateFormat) {
+function getGit(infoGitMode, dateFormat) {
   const properties = getGitFile()
   let git
 
   if (properties !== undefined) {
-    const time = dateFormat
-      ? moment(properties.get('git.commit.time')).format(dateFormat)
-      : properties.get('git.commit.time')
+    const time = dateFormat ?
+      moment(properties.get('git.commit.time')).format(dateFormat) :
+      properties.get('git.commit.time')
 
     if (infoGitMode === 'simple') {
       git = {
@@ -99,7 +98,7 @@ function getGit (infoGitMode, dateFormat) {
   return git
 }
 
-function getGitFile () {
+function getGitFile() {
   let properties = cache.get('properties')
   if (properties === undefined) {
     try {
