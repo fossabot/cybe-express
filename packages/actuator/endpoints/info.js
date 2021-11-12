@@ -1,6 +1,6 @@
-const fs = require('fs')
-const propertiesReader = require('../../properties-reader')
-const moment = require('moment')
+const fs = require('fs');
+const getRepoInfo = require('git-repo-info');
+const moment = require('moment');
 
 let gitMode;
 let dateFormat;
@@ -16,8 +16,9 @@ class Info {
   }
 
   route(req, res) {
-    const build = getBuild(buildOptions)
-    const git = getGit(gitMode, dateFormat)
+    const build = getBuild(buildOptions);
+    const git = getRepoInfo();
+
 
     res.status(200).json({
       build: build,
@@ -56,57 +57,4 @@ function getPackageJsonFile() {
     }
   }
   return packageJson
-}
-
-function getGit(infoGitMode, dateFormat) {
-  const properties = getGitFile()
-  let git
-
-  if (properties !== undefined) {
-    const time = dateFormat ?
-      moment(properties.get('git.commit.time')).format(dateFormat) :
-      properties.get('git.commit.time')
-
-    if (infoGitMode === 'simple') {
-      git = {
-        branch: properties.get('git.branch'),
-        commit: {
-          id: properties.getRaw('git.commit.id.abbrev'),
-          time
-        }
-      }
-    } else if (infoGitMode === 'full') {
-      git = {
-        branch: properties.get('git.branch'),
-        commit: {
-          id: properties.getRaw('git.commit.id.abbrev'),
-          idFull: properties.get('git.commit.id'),
-          time,
-          user: {
-            email: properties.get('git.commit.user.email'),
-            name: properties.get('git.commit.user.name')
-          },
-          message: {
-            full: properties.get('git.commit.message.full'),
-            short: properties.get('git.commit.message.short')
-          }
-        }
-      }
-    }
-  }
-
-  return git
-}
-
-function getGitFile() {
-  let properties = cache.get('properties')
-  if (properties === undefined) {
-    try {
-      properties = propertiesReader('git.properties')
-      cache.set('properties', properties)
-    } catch (error) {
-      // do nothing
-    }
-  }
-  return properties
 }
