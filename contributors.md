@@ -1,0 +1,3 @@
+- bryce d. (no socials)(`frontend dev`)
+- daniel d. (https://twitter.com/@cybetwt)(`backend dev`)
+- ridhesh w. (https://twitter.com/@ridheshcybe)(`team lead`)
