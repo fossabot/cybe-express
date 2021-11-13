@@ -2,6 +2,7 @@ var {
     IncomingMessage
 } = require('http');
 var accepts = require('accepts');
+var parseRange = require('../range-parser')
 
 var req = Object.create(IncomingMessage.prototype);
 
