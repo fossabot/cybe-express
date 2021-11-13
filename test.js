@@ -1,9 +1,13 @@
-require('./packages/helpers');
+global.debug = true;
 
-console.debug('strted')
+const cybeexpress = require('./packages/cybeexpress');
+const chalk = require('chalk');
+const app = cybeexpress();
 
-console.info('hello')
+app.get.on('/', (req, res) => {
+    res.end('test')
+})
 
-console.warn('nooo')
-
-console.caution('no')
+app.listen(443, () => {
+    console.log(`${chalk.blue("[Info]")} listening on 443`);
+});
