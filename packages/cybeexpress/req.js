@@ -119,4 +119,8 @@ req.protocol = (()=>{
 
 req.secure = this.protocol === 'https';
 
+req.path = (()=>{
+    new URL(this).pathname
+})();
+
 module.exports = req;
