@@ -1,1 +1,9 @@
-//https://www.cabinhomes.com/listing/3yd-gaarga-477725-1147-maiden-cane-way-lincolnton-ga-30817/
+require('./packages/helpers');
+
+console.debug('strted')
+
+console.info('hello')
+
+console.warn('nooo')
+
+console.caution('no')
