@@ -277,4 +277,30 @@ res.append = function append(field, val) {
     return this.set(field, value);
 };
 
+res.set = res.header = function header(field, val) {
+  if (arguments.length === 2) {
+    var value = Array.isArray(val)
+      ? val.map(String)
+      : String(val);
+
+    // add charset to content-type
+    if (field.toLowerCase() === 'content-type') {
+      if (Array.isArray(value)) {
+        throw new TypeError('Content-Type cannot be set to an Array');
+      }
+      if (!charsetRegExp.test(value)) {
+        var charset = mime.charsets.lookup(value.split(';')[0]);
+        if (charset) value += '; charset=' + charset.toLowerCase();
+      }
+    }
+
+    this.setHeader(field, value);
+  } else {
+    for (var key in field) {
+      this.set(key, field[key]);
+    }
+  }
+  return this;
+};
+
 module.exports = res
