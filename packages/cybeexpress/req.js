@@ -49,4 +49,20 @@ req.range = function range(size, options) {
     return parseRange(size, range, options);
 };
 
+req.param = function param(name, defaultValue = '') {
+  var params = this.params || {};
+  var body = this.body || {};
+  var query = this.query || {};
+
+  var args = arguments.length === 1 ? 'name' : 'name, default';
+  console.warn(`req.param(${args}): Use req.params, req.body, or req.query instead`);
+
+  if (null != params[name] && params.hasOwnProperty(name)) return params[name];
+  if (null != body[name]) return body[name];
+  if (null != query[name]) return query[name];
+
+  return defaultValue;
+};
+
+
 module.exports = req;
