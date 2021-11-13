@@ -1,6 +1,7 @@
 var {
     IncomingMessage
 } = require('http');
+var accepts = require('accepts');
 
 var req = Object.create(IncomingMessage.prototype);
 
@@ -20,5 +21,10 @@ req.get = (header) => {
         return this.headers[lower];
     }
 }
+
+req.accepts = () => {
+  var accept = accepts(this);
+  return accept.types.apply(accept, arguments);
+};
 
 module.exports = req;
