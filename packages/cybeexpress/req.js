@@ -1,6 +1,7 @@
 var {
     IncomingMessage
 } = require('http');
+var typeis = require('type-is');
 var accepts = require('accepts');
 var parseRange = require('../range-parser')
 
@@ -50,19 +51,32 @@ req.range = function range(size, options) {
 };
 
 req.param = function param(name, defaultValue = '') {
-  var params = this.params || {};
-  var body = this.body || {};
-  var query = this.query || {};
+    var params = this.params || {};
+    var body = this.body || {};
+    var query = this.query || {};
 
-  var args = arguments.length === 1 ? 'name' : 'name, default';
-  console.warn(`req.param(${args}): Use req.params, req.body, or req.query instead`);
+    var args = arguments.length === 1 ? 'name' : 'name, default';
+    console.warn(`req.param(${args}): Use req.params, req.body, or req.query instead`);
 
-  if (null != params[name] && params.hasOwnProperty(name)) return params[name];
-  if (null != body[name]) return body[name];
-  if (null != query[name]) return query[name];
+    if (null != params[name] && params.hasOwnProperty(name)) return params[name];
+    if (null != body[name]) return body[name];
+    if (null != query[name]) return query[name];
 
-  return defaultValue;
+    return defaultValue;
 };
 
+req.is = function is(types) {
+    var arr = types;
+
+    // support flattened arguments
+    if (!Array.isArray(types)) {
+        arr = new Array(arguments.length);
+        for (var i = 0; i < arr.length; i++) {
+            arr[i] = arguments[i];
+        }
+    }
+
+    return typeis(this, arr);
+};
 
 module.exports = req;
