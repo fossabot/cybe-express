@@ -4,7 +4,8 @@ var {
 var {
     setCharset,
     isAbsolute,
-    sendfile
+    sendfile,
+    ContentDisposition
 } = require('./util');
 var statuses = require('./statuses.json');
 var mime = require('mime');
@@ -233,6 +234,33 @@ res.sendFile = (path, opts, callback) => {
             next(err);
         }
     });
+}
+
+res.downlaod = (path, filename, options, callback) => {
+    var done = callback;
+    var name = filename;
+    var opts = options || null
+
+    // support function as second or third arg
+    if (typeof filename === 'function') {
+        done = filename;
+        name = null;
+        opts = null
+    } else if (typeof options === 'function') {
+        done = options
+        opts = null
+    }
+
+    var headers = {
+        'Content-Disposition': contentDisposition(name || path)
+    };
+
+    opts = Object.create(opts)
+    opts.headers = headers
+
+    var fullPath = resolve(path);
+
+    return this.sendFile(fullPath, opts, done)
 }
 
 module.exports = res
