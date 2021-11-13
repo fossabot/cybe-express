@@ -115,6 +115,6 @@ req.protocol = (()=>{
   var index = header.indexOf(',')
 
   return index !== -1 ? header.substring(0, index).trim() : header.trim()
-})
+})();
 
 module.exports = req;
