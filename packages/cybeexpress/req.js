@@ -1,9 +1,13 @@
 var {
     IncomingMessage
 } = require('http');
+var {
+    defineGetter
+} = requrie('./util');
 var typeis = require('type-is');
 var accepts = require('accepts');
-var parseRange = require('../range-parser')
+var proxyaddr = require('../proxyaddr');
+var parseRange = require('../range-parser');
 
 var req = Object.create(IncomingMessage.prototype);
 
@@ -78,5 +82,12 @@ req.is = function is(types) {
 
     return typeis(this, arr);
 };
+
+defineGetter(req, 'ip', () => {
+    var trust = this.app.get('trust proxy fn');
+    return proxyaddr(this, trust);
+});
+
+
 
 module.exports = req;
