@@ -2,7 +2,9 @@ var {
     ServerResponse
 } = require('node:http');
 var {
-    setCharset
+    setCharset,
+    isAbsolute,
+    sendfile
 } = require('./util');
 var statuses = require('./statuses.json');
 var mime = require('mime');
@@ -195,5 +197,42 @@ res.sendStatus = function sendStatus(statusCode) {
 
     return this.send(body);
 };
+
+res.sendFile = (path, opts, callback) => {
+    var done = callback;
+    var req = this.req;
+    var res = this;
+    var next = req.next;
+
+    if (!path) {
+        throw new TypeError('path argument is required to res.sendFile');
+    };
+
+    if (typeof path !== 'string') {
+        throw new TypeError('path must be a string to res.sendFile')
+    };
+
+    if (typeof opts === 'function') {
+        done = opts;
+        opts = {};
+    };
+
+    if (!opts.root && !isAbsolute(path)) {
+        throw new TypeError('path must be absolute or specify root to res.sendFile');
+    }
+
+    var pathname = encodeURI(path);
+    var file = send(req, pathname, opts);
+
+    sendfile(res, file, opts, function (err) {
+        if (done) return done(err);
+        if (err && err.code === 'EISDIR') return next();
+
+        // next() all but write errors
+        if (err && err.code !== 'ECONNABORTED' && err.syscall !== 'write') {
+            next(err);
+        }
+    });
+}
 
 module.exports = res
