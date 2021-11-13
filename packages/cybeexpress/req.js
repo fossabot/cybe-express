@@ -42,4 +42,10 @@ req.acceptsLanguages = function () {
     return accept.languages.apply(accept, arguments);
 };
 
+req.range = function range(size, options) {
+    var range = this.get('Range');
+    if (!range) return;
+    return parseRange(size, range, options);
+};
+
 module.exports = req;
