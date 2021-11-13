@@ -70,16 +70,7 @@ function compileETag(val) {
     return fn;
 }
 
-function defineGetter(obj, name, getter) {
-    Object.defineProperty(obj, name, {
-      configurable: true,
-      enumerable: true,
-      get: getter
-    });
-  }
-
 module.exports = {
     compileQueryParser,
-    compileETag,
-    defineGetter
+    compileETag
 }

@@ -2,7 +2,6 @@ var typeis = require('type-is');
 var accepts = require('accepts');
 var { isIP } = require('node:net');
 var proxyaddr = require('../proxyaddr');
-var { defineGetter } = requrie('./util');
 var parseRange = require('../range-parser');
 var { IncomingMessage } = require('node:http');
 
@@ -80,12 +79,12 @@ req.is = function is(types) {
     return typeis(this, arr);
 };
 
-defineGetter(req, 'ip', () => {
+req.ip = (() => {
     var trust = this.app.get('trust proxy fn');
     return proxyaddr(this, trust) || req.headers['x-forwarded-for'].split(',').shift() || req.socket.remoteAddress
-});
+})();
 
-defineGetter(req, 'ips', function ips() {
+req.ips = (()=>{
     var trust = this.app.get('trust proxy fn');
     var addrs = proxyaddr.all(this, trust);
 
@@ -94,15 +93,15 @@ defineGetter(req, 'ips', function ips() {
     addrs.reverse().pop()
 
     return addrs
-});
+})();
 
-defineGetter(req, 'subdomains', function subdomains() {
+req.subdomains = (()=>{
     var hostname = this.hostname || [];
 
     var offset = this.app.get('subdomain offset') || 0;
     var subdomains = !isIP(hostname) ? hostname.split('.').reverse() : [hostname];
 
     return subdomains.slice(offset);
-});
+})();
 
 module.exports = req;
