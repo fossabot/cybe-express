@@ -1,13 +1,10 @@
-var {
-    IncomingMessage
-} = require('http');
-var {
-    defineGetter
-} = requrie('./util');
 var typeis = require('type-is');
 var accepts = require('accepts');
+var { isIP } = require('node:net');
 var proxyaddr = require('../proxyaddr');
+var { defineGetter } = requrie('./util');
 var parseRange = require('../range-parser');
+var { IncomingMessage } = require('node:http');
 
 var req = Object.create(IncomingMessage.prototype);
 
@@ -97,6 +94,19 @@ defineGetter(req, 'ips', function ips() {
     addrs.reverse().pop()
 
     return addrs
+});
+
+defineGetter(req, 'subdomains', function subdomains() {
+    var hostname = this.hostname;
+
+    if (!hostname) return [];
+
+    var offset = this.app.get('subdomain offset');
+    var subdomains = !isIP(hostname) ?
+        hostname.split('.').reverse() :
+        [hostname];
+
+    return subdomains.slice(offset);
 });
 
 module.exports = req;
