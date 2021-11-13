@@ -263,4 +263,18 @@ res.downlaod = (path, filename, options, callback) => {
     return this.sendFile(fullPath, opts, done)
 }
 
+res.append = function append(field, val) {
+    var prev = this.get(field);
+    var value = val;
+
+    if (prev) {
+        // concat the new and prev vals
+        value = Array.isArray(prev) ? prev.concat(val) :
+            Array.isArray(val) ? [prev].concat(val) :
+            [prev, val];
+    }
+
+    return this.set(field, value);
+};
+
 module.exports = res
