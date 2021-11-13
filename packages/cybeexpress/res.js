@@ -337,18 +337,24 @@ res.cookie = (name, value, options) => {
 
     var val = typeof value === 'object' ? 'j:' + JSON.stringify(value) : String(value);
 
-    if (signed)  val = 's:' + sign(val, secret);
+    if (signed) val = 's:' + sign(val, secret);
 
     if ('maxAge' in opts) {
         opts.expires = new Date(Date.now() + opts.maxAge);
         opts.maxAge /= 1000;
     }
 
-    if (opts.path == null)  opts.path = '/';
+    if (opts.path == null) opts.path = '/';
 
     this.append('Set-Cookie', cookie.serialize(name, String(val), opts));
 
     return this;
+};
+
+res.location = function location(url) {
+    if (url === 'back') url = this.req.get('Referrer') || '/';
+
+    return this.set('Location', encodeUrl(url));
 };
 
 module.exports = res
