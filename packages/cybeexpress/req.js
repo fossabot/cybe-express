@@ -143,4 +143,29 @@ req.hostname = (()=>{
     return index !== -1 ? host.substring(0, index) : host;
 })();
 
+req.host = this.hostname;
+
+req.fresh = (()=>{
+    var method = this.method;
+    var res = this.res
+    var status = res.statusCode
+  
+    // GET or HEAD for weak freshness validation only
+    if ('GET' !== method && 'HEAD' !== method) return false;
+  
+    // 2xx or 304 as per rfc2616 14.26
+    if ((status >= 200 && status < 300) || 304 === status) {
+      return fresh(this.headers, {
+        'etag': res.get('ETag'),
+        'last-modified': res.get('Last-Modified')
+      })
+    }
+  
+    return false;
+})();
+
+req.stale = !this.fresh;
+
+req.xhr = (this.get('X-Requested-With') || '').toLowerCase() === 'xmlhttprequest';
+
 module.exports = req;
