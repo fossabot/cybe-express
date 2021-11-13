@@ -4,6 +4,7 @@ var {
 var {
     setCharset
 } = require('./util');
+var statuses = require('./statuses.json');
 var mime = require('mime');
 
 var res = Object.create(ServerResponse.prototype)
@@ -54,6 +55,61 @@ res.get = (field) => {
 res.type = (type) => {
     var ct = type.indexOf('/') === -1 ? mime.lookup(type) : type;
     return this.set('Content-Type', ct);
+};
+
+res.json = (obj) => {
+    var escape = app.get('json escape')
+    var replacer = app.get('json replacer');
+    var spaces = app.get('json spaces');
+    var body = stringify(obj, replacer, spaces, escape)
+
+    // content-type
+    if (!this.get('Content-Type')) {
+        this.set('Content-Type', 'application/json');
+    }
+
+    return this.send(body);
+}
+
+res.jsonp = function jsonp(val) {
+    // settings
+    var app = this.app;
+    var escape = app.get('json escape')
+    var replacer = app.get('json replacer');
+    var spaces = app.get('json spaces');
+    var body = stringify(val, replacer, spaces, escape)
+    var callback = this.req.query[app.get('jsonp callback name')];
+
+    // content-type
+    if (!this.get('Content-Type')) {
+        this.set('X-Content-Type-Options', 'nosniff');
+        this.set('Content-Type', 'application/json');
+    }
+
+    // fixup callback
+    if (Array.isArray(callback)) {
+        callback = callback[0];
+    }
+
+    // jsonp
+    if (typeof callback === 'string' && callback.length !== 0) {
+        this.set('X-Content-Type-Options', 'nosniff');
+        this.set('Content-Type', 'text/javascript');
+
+        // restrict callback charset
+        callback = callback.replace(/[^\[\]\w$.]/g, '');
+
+        // replace chars not allowed in JavaScript that are in JSON
+        body = body
+            .replace(/\u2028/g, '\\u2028')
+            .replace(/\u2029/g, '\\u2029');
+
+        // the /**/ is a specific security mitigation for "Rosetta Flash JSONP abuse"
+        // the typeof check is just to reduce client error noise
+        body = '/**/ typeof ' + callback + ' === \'function\' && ' + callback + '(' + body + ');';
+    }
+
+    return this.send(body);
 };
 
 res.send = (body) => {
@@ -131,57 +187,11 @@ res.send = (body) => {
     return this;
 }
 
-res.json = (obj) => {
-    var escape = app.get('json escape')
-    var replacer = app.get('json replacer');
-    var spaces = app.get('json spaces');
-    var body = stringify(obj, replacer, spaces, escape)
+res.sendStatus = function sendStatus(statusCode) {
+    var body = statuses[statusCode] || String(statusCode)
 
-    // content-type
-    if (!this.get('Content-Type')) {
-        this.set('Content-Type', 'application/json');
-    }
-
-    return this.send(body);
-}
-
-res.jsonp = function jsonp(val) {
-    // settings
-    var app = this.app;
-    var escape = app.get('json escape')
-    var replacer = app.get('json replacer');
-    var spaces = app.get('json spaces');
-    var body = stringify(val, replacer, spaces, escape)
-    var callback = this.req.query[app.get('jsonp callback name')];
-
-    // content-type
-    if (!this.get('Content-Type')) {
-        this.set('X-Content-Type-Options', 'nosniff');
-        this.set('Content-Type', 'application/json');
-    }
-
-    // fixup callback
-    if (Array.isArray(callback)) {
-        callback = callback[0];
-    }
-
-    // jsonp
-    if (typeof callback === 'string' && callback.length !== 0) {
-        this.set('X-Content-Type-Options', 'nosniff');
-        this.set('Content-Type', 'text/javascript');
-
-        // restrict callback charset
-        callback = callback.replace(/[^\[\]\w$.]/g, '');
-
-        // replace chars not allowed in JavaScript that are in JSON
-        body = body
-            .replace(/\u2028/g, '\\u2028')
-            .replace(/\u2029/g, '\\u2029');
-
-        // the /**/ is a specific security mitigation for "Rosetta Flash JSONP abuse"
-        // the typeof check is just to reduce client error noise
-        body = '/**/ typeof ' + callback + ' === \'function\' && ' + callback + '(' + body + ');';
-    }
+    this.statusCode = statusCode;
+    this.type('txt');
 
     return this.send(body);
 };
