@@ -4,12 +4,12 @@ var {
 
 var res = Object.create(ServerResponse.prototype)
 
-res.status = function status(code) {
+res.status = (code) => {
     this.statusCode = code;
     return this;
 };
 
-res.links = function (links) {
+res.links = (links) => {
     var link = this.get('Link') || '';
     if (link) link += ', ';
     return this.set('Link', link + Object.keys(links).map((rel) => {
