@@ -22,7 +22,7 @@ req.get = (header) => {
     }
 }
 
-req.accepts = () => {
+req.accepts = function() {
   var accept = accepts(this);
   return accept.types.apply(accept, arguments);
 };
