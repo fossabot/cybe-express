@@ -88,6 +88,15 @@ defineGetter(req, 'ip', () => {
     return proxyaddr(this, trust);
 });
 
+defineGetter(req, 'ips', function ips() {
+    var trust = this.app.get('trust proxy fn');
+    var addrs = proxyaddr.all(this, trust);
 
+    // reverse the order (to farthest -> closest)
+    // and remove socket address
+    addrs.reverse().pop()
+
+    return addrs
+});
 
 module.exports = req;
