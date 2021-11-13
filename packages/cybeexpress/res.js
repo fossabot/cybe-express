@@ -5,10 +5,11 @@ var {
     setCharset,
     isAbsolute,
     sendfile,
-    ContentDisposition
+    contentDisposition
 } = require('./util');
 var statuses = require('./statuses.json');
 var mime = require('mime');
+var cookie = require('cookie');
 
 var res = Object.create(ServerResponse.prototype)
 
@@ -270,37 +271,84 @@ res.append = function append(field, val) {
     if (prev) {
         // concat the new and prev vals
         value = Array.isArray(prev) ? prev.concat(val) :
-            Array.isArray(val) ? [prev].concat(val) :
-            [prev, val];
+            Array.isArray(val) ? [prev].concat(val) : [prev, val];
     }
 
     return this.set(field, value);
 };
 
 res.set = res.header = function header(field, val) {
-  if (arguments.length === 2) {
-    var value = Array.isArray(val)
-      ? val.map(String)
-      : String(val);
+    if (arguments.length === 2) {
+        var value = Array.isArray(val) ?
+            val.map(String) :
+            String(val);
 
-    // add charset to content-type
-    if (field.toLowerCase() === 'content-type') {
-      if (Array.isArray(value)) {
-        throw new TypeError('Content-Type cannot be set to an Array');
-      }
-      if (!charsetRegExp.test(value)) {
-        var charset = mime.charsets.lookup(value.split(';')[0]);
-        if (charset) value += '; charset=' + charset.toLowerCase();
-      }
+        // add charset to content-type
+        if (field.toLowerCase() === 'content-type') {
+            if (Array.isArray(value)) {
+                throw new TypeError('Content-Type cannot be set to an Array');
+            }
+            if (!charsetRegExp.test(value)) {
+                var charset = mime.charsets.lookup(value.split(';')[0]);
+                if (charset) value += '; charset=' + charset.toLowerCase();
+            }
+        }
+
+        this.setHeader(field, value);
+    } else {
+        for (var key in field) {
+            this.set(key, field[key]);
+        }
+    }
+    return this;
+};
+
+res.clearCookie = function clearCookie(name, options) {
+    var opts = ((a, b) => {
+        if (a && b) {
+            for (var key in b) {
+                a[key] = b[key];
+            }
+        }
+        return a;
+    })({
+        expires: new Date(1),
+        path: '/'
+    }, options);
+
+    return this.cookie(name, '', opts);
+};
+
+res.cookie = (name, value, options) => {
+    var opts = ((a, b) => {
+        if (a && b) {
+            for (var key in b) {
+                a[key] = b[key];
+            }
+        }
+        return a;
+    })({}, options);
+    var secret = this.req.secret;
+    var signed = opts.signed;
+
+    if (signed && !secret) {
+        throw new Error('cookieParser("secret") required for signed cookies');
     }
 
-    this.setHeader(field, value);
-  } else {
-    for (var key in field) {
-      this.set(key, field[key]);
+    var val = typeof value === 'object' ? 'j:' + JSON.stringify(value) : String(value);
+
+    if (signed)  val = 's:' + sign(val, secret);
+
+    if ('maxAge' in opts) {
+        opts.expires = new Date(Date.now() + opts.maxAge);
+        opts.maxAge /= 1000;
     }
-  }
-  return this;
+
+    if (opts.path == null)  opts.path = '/';
+
+    this.append('Set-Cookie', cookie.serialize(name, String(val), opts));
+
+    return this;
 };
 
 module.exports = res
