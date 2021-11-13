@@ -117,4 +117,6 @@ req.protocol = (()=>{
   return index !== -1 ? header.substring(0, index).trim() : header.trim()
 })();
 
+req.secure = this.protocol === 'https';
+
 module.exports = req;
