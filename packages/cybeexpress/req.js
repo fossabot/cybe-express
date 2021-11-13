@@ -117,8 +117,6 @@ req.protocol = (()=>{
   return index !== -1 ? header.substring(0, index).trim() : header.trim()
 })();
 
-req.secure = this.protocol === 'https';
-
 req.path = (()=>{
     new URL(this).pathname
 })();
@@ -143,8 +141,6 @@ req.hostname = (()=>{
     return index !== -1 ? host.substring(0, index) : host;
 })();
 
-req.host = this.hostname;
-
 req.fresh = (()=>{
     var method = this.method;
     var res = this.res
@@ -164,8 +160,9 @@ req.fresh = (()=>{
     return false;
 })();
 
+req.host = this.hostname;
 req.stale = !this.fresh;
-
+req.secure = this.protocol === 'https';
 req.xhr = (this.get('X-Requested-With') || '').toLowerCase() === 'xmlhttprequest';
 
 module.exports = req;
