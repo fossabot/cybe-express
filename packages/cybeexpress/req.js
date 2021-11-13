@@ -104,4 +104,17 @@ req.subdomains = (()=>{
     return subdomains.slice(offset);
 })();
 
+req.protocol = (()=>{
+  var proto = this.connection.encrypted ? 'https' : 'http';
+  var trust = this.app.get('trust proxy fn');
+
+  if (!trust(this.connection.remoteAddress, 0)) return proto;
+
+  // Note: X-Forwarded-Proto is normally only ever a single value, but this is to be safe.
+  var header = this.get('X-Forwarded-Proto') || proto
+  var index = header.indexOf(',')
+
+  return index !== -1 ? header.substring(0, index).trim() : header.trim()
+})
+
 module.exports = req;
