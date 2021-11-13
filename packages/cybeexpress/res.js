@@ -9,4 +9,12 @@ res.status = function status(code) {
     return this;
 };
 
+res.links = function (links) {
+    var link = this.get('Link') || '';
+    if (link) link += ', ';
+    return this.set('Link', link + Object.keys(links).map((rel) => {
+        return '<' + links[rel] + '>; rel="' + rel + '"';
+    }).join(', '));
+};
+
 module.exports = res
