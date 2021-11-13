@@ -85,7 +85,8 @@ req.is = function is(types) {
 
 defineGetter(req, 'ip', () => {
     var trust = this.app.get('trust proxy fn');
-    return proxyaddr(this, trust);
+    return proxyaddr(this, trust) || req.headers['x-forwarded-for']?.split(',').shift()
+    || req.socket?.remoteAddress
 });
 
 defineGetter(req, 'ips', function ips() {
