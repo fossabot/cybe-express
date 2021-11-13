@@ -56,20 +56,6 @@ res.type = (type) => {
     return this.set('Content-Type', ct);
 };
 
-res.json = (body) => {
-    var escape = app.get('json escape')
-    var replacer = app.get('json replacer');
-    var spaces = app.get('json spaces');
-    var body = stringify(val, replacer, spaces, escape)
-
-    // content-type
-    if (!this.get('Content-Type')) {
-        this.set('Content-Type', 'application/json');
-    }
-
-    return this.send(body);
-}
-
 res.send = (body) => {
     var etagFn = app.get('etag fn');
     var generateETag = !this.get('ETag') && typeof etagFn === 'function';
@@ -143,6 +129,20 @@ res.send = (body) => {
 
     this.end(chunk, encoding);
     return this;
+}
+
+res.json = (obj) => {
+    var escape = app.get('json escape')
+    var replacer = app.get('json replacer');
+    var spaces = app.get('json spaces');
+    var body = stringify(obj, replacer, spaces, escape)
+
+    // content-type
+    if (!this.get('Content-Type')) {
+        this.set('Content-Type', 'application/json');
+    }
+
+    return this.send(body);
 }
 
 module.exports = res
