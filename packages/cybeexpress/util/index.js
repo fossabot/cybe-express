@@ -1,5 +1,6 @@
 var qs = require('../qs');
 var url = require('node:url');
+var contentType = require('content-type');
 
 function compileQueryParser(val) {
     var fn;
@@ -70,7 +71,23 @@ function compileETag(val) {
     return fn;
 }
 
+function setCharset(type, charset) {
+    if (!type || !charset) {
+      return type;
+    }
+  
+    // parse type
+    var parsed = contentType.parse(type);
+  
+    // set charset
+    parsed.parameters.charset = charset;
+  
+    // format type
+    return contentType.format(parsed);
+  };
+
 module.exports = {
     compileQueryParser,
-    compileETag
+    compileETag,
+    setCharset
 }
