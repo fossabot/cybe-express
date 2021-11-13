@@ -13,18 +13,33 @@ req.get = (header) => {
     var lower = header.toLowerCase();
 
     switch (lower) {
-      case 'referer':
-      case 'referrer':
-        return this.headers.referrer
-          || this.headers.referer;
-      default:
-        return this.headers[lower];
+        case 'referer':
+        case 'referrer':
+            return this.headers.referrer ||
+                this.headers.referer;
+        default:
+            return this.headers[lower];
     }
 }
 
-req.accepts = function() {
-  var accept = accepts(this);
-  return accept.types.apply(accept, arguments);
+req.accepts = function () {
+    var accept = accepts(this);
+    return accept.types.apply(accept, arguments);
+};
+
+req.acceptsEncodings = function () {
+    var accept = accepts(this);
+    return accept.encodings.apply(accept, arguments);
+};
+
+req.acceptsCharsets = function () {
+    var accept = accepts(this);
+    return accept.charsets.apply(accept, arguments);
+};
+
+req.acceptsLanguages = function () {
+    var accept = accepts(this);
+    return accept.languages.apply(accept, arguments);
 };
 
 module.exports = req;
