@@ -432,8 +432,62 @@ res.redirect = function redirect(url) {
     if (this.req.method === 'HEAD') {
         return this.end();
     };
-    
+
     this.end(body);
+};
+
+res.vary = function (field) {
+    if (!field || (Array.isArray(field) && !field.length)) {
+        console.trace('res.vary(): Provide a field name');
+        return this;
+    }
+
+    ((res, field) => {
+        var val = res.getHeader('Vary') || ''
+        var header = Array.isArray(val) ? val.join(', ') : String(val)
+        val = ((header, field) => {
+            // get fields array
+            var fields = !Array.isArray(field) ?
+                parse(String(field)) :
+                field
+
+            // assert on invalid field names
+            for (var j = 0; j < fields.length; j++) {
+                if (!FIELD_NAME_REGEXP.test(fields[j])) {
+                    throw new TypeError('field argument contains an invalid header name')
+                }
+            }
+
+            // existing, unspecified vary
+            if (header === '*')  return header;
+
+            // enumerate current values
+            var val = header
+            var vals = parse(header.toLowerCase())
+
+            // unspecified vary
+            if (fields.indexOf('*') !== -1 || vals.indexOf('*') !== -1) {
+                return '*'
+            }
+
+            for (var i = 0; i < fields.length; i++) {
+                var fld = fields[i].toLowerCase()
+
+                // append value (case-preserving)
+                if (vals.indexOf(fld) === -1) {
+                    vals.push(fld)
+                    val = val ? val + ', ' + fields[i] : fields[i]
+                }
+            }
+
+            return val;
+        })(header, field);
+
+        if (val) res.setHeader('Vary', val)
+
+    })(this, field);
+
+    return this;
 };
 
 module.exports = res
