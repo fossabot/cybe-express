@@ -2,6 +2,14 @@ var {
     ServerResponse
 } = require('node:http');
 var {
+    resolve,
+    extname
+} = require('node:path');
+var {
+    existsSync,
+    readFileSync
+} = require('node:fs');
+var {
     setCharset,
     isAbsolute,
     sendfile,
@@ -62,6 +70,7 @@ res.type = (type) => {
 };
 
 res.json = (obj) => {
+    var app = this.app;
     var escape = app.get('json escape')
     var replacer = app.get('json replacer');
     var spaces = app.get('json spaces');
@@ -75,7 +84,7 @@ res.json = (obj) => {
     return this.send(body);
 }
 
-res.jsonp = function jsonp(val) {
+res.jsonp = (val) => {
     // settings
     var app = this.app;
     var escape = app.get('json escape')
@@ -191,7 +200,7 @@ res.send = (body) => {
     return this;
 }
 
-res.sendStatus = function sendStatus(statusCode) {
+res.sendStatus = (statusCode) => {
     var body = statuses[statusCode] || String(statusCode)
 
     this.statusCode = statusCode;
@@ -264,7 +273,7 @@ res.downlaod = (path, filename, options, callback) => {
     return this.sendFile(fullPath, opts, done)
 }
 
-res.append = function append(field, val) {
+res.append = (field, val) => {
     var prev = this.get(field);
     var value = val;
 
@@ -277,7 +286,7 @@ res.append = function append(field, val) {
     return this.set(field, value);
 };
 
-res.set = res.header = function header(field, val) {
+res.header = function header(field, val) {
     if (arguments.length === 2) {
         var value = Array.isArray(val) ?
             val.map(String) :
@@ -303,7 +312,7 @@ res.set = res.header = function header(field, val) {
     return this;
 };
 
-res.clearCookie = function clearCookie(name, options) {
+res.clearCookie = (name, options) => {
     var opts = ((a, b) => {
         if (a && b) {
             for (var key in b) {
@@ -351,13 +360,13 @@ res.cookie = (name, value, options) => {
     return this;
 };
 
-res.location = function location(url) {
+res.location = (url) => {
     if (url === 'back') url = this.req.get('Referrer') || '/';
 
     return this.set('Location', encodeUrl(url));
 };
 
-res.format = function (obj) {
+res.format = (obj) => {
     var req = this.req;
     var {
         next
@@ -436,7 +445,7 @@ res.redirect = function redirect(url) {
     this.end(body);
 };
 
-res.vary = function (field) {
+res.vary = (field) => {
     if (!field || (Array.isArray(field) && !field.length)) {
         console.trace('res.vary(): Provide a field name');
         return this;
@@ -459,7 +468,7 @@ res.vary = function (field) {
             }
 
             // existing, unspecified vary
-            if (header === '*')  return header;
+            if (header === '*') return header;
 
             // enumerate current values
             var val = header
@@ -489,5 +498,22 @@ res.vary = function (field) {
 
     return this;
 };
+
+res.render = (filepath, local, callback = (err, str) => {
+    if (err) return req.next(err);
+    this.send(str);
+}) => {
+    var app = this.app;
+    var path = resolve(this.get('views'), filepath);
+    var engine = app.engines[extname(path)];
+
+    if (!existsSync(path)) return callback(`${path} dosen't exists 404`, null);
+    if (!engine) return callback(`${extname(path)} this extension has no predifined cybeexpress.engine(${extname(path)}, [whatever function])`, null);
+    if (typeof engine !== "function") return callback(`${typeof engine} !== function`, null)
+
+    return callback(null, engine(readFileSync(path, 'utf-8'), local));
+}
+
+res.set = res.header;
 
 module.exports = res
