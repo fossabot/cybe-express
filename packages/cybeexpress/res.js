@@ -357,4 +357,83 @@ res.location = function location(url) {
     return this.set('Location', encodeUrl(url));
 };
 
+res.format = function (obj) {
+    var req = this.req;
+    var {
+        next
+    } = req;
+
+    var fn = obj.default;
+    if (fn) delete obj.default;
+    var keys = Object.keys(obj);
+
+    var key = keys.length > 0 ?
+        req.accepts(keys) :
+        false;
+
+    this.vary("Accept");
+
+    if (key) {
+        this.set('Content-Type', normalizeType(key).value);
+        obj[key](req, this, next);
+    } else if (fn) {
+        fn();
+    } else {
+        var err = new Error('Not Acceptable');
+        err.status = err.statusCode = 406;
+        err.types = normalizeTypes(keys).map(function (o) {
+            return o.value
+        });
+        next(err);
+    }
+
+    return this;
+};
+
+res.redirect = function redirect(url) {
+    var address = url;
+    var body;
+    var status = 302;
+
+    // allow status / url
+    if (arguments.length === 2) {
+        if (typeof arguments[0] === 'number') {
+            status = arguments[0];
+            address = arguments[1];
+        } else {
+            console.trace('res.redirect(url, status): Use res.redirect(status, url) instead');
+            status = arguments[1];
+        }
+    }
+
+    // Set location header
+    address = this.location(address).get('Location');
+
+    // Support text/{plain,html} by default
+    this.format({
+        text: () => {
+            body = `${statuses[status]}. Redirecting to ${address}`
+        },
+
+        html: () => {
+            var u = escapeHtml(address);
+            body = `<p>${statuses[status]}. Redirecting to <a href="${u}">${u}</a></p>`
+        },
+
+        default: () => {
+            body = '';
+        }
+    });
+
+    // Respond
+    this.statusCode = status;
+    this.set('Content-Length', Buffer.byteLength(body));
+
+    if (this.req.method === 'HEAD') {
+        return this.end();
+    };
+    
+    this.end(body);
+};
+
 module.exports = res
