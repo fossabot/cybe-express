@@ -1,12 +1,22 @@
 {
   "name": "cybe-express",
   "version": "0.0.0-beta",
+  "main": "./src/index.js",
+  "homepage": "cybemachine.github.io/cybe-express",
   "description": "cybe-express a node module inspired by express",
-  "main": "index.js",
   "repository": "https://github.com/cybemachine/cybe-express.git",
-  "author": "cybemachine <cybemachine142@gmail.com>",
+  "author": {
+    "name": "cybemachine",
+    "email": "cybemachine142@gmail.com",
+    "url": "https://twitter.com/ridheshcybe"
+  },
   "license": "SEE LICENSE IN license",
-  "private": false,
+  "keywords": [
+    "cybemachine",
+    "express",
+    "cybetwt",
+    "cybe"
+  ],
   "dependencies": {
     "accepts": "^1.3.7",
     "chalk": "^4.1.2",
