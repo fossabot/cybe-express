@@ -4,7 +4,7 @@ var {
     EventEmitter
 } = require('node:events');
 var proto = require('./proto');
-var req = requrie('./req');
+var req = require('./req');
 var res = require('./res');
 
 function mixin(dest, src, redefine) {

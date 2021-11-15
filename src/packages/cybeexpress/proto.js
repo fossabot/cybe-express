@@ -52,7 +52,7 @@ app.defaultConfiguration = function defaultConfiguration() {
   this.locals.settings = this.settings;
 
   // default configuration
-  this.set('views', resolve(process.cwd(), 'views'));
+  this.set('views', require('path').resolve(process.cwd(), 'views'));
   this.set('jsonp callback name', 'callback');
 
   if (env === 'production') this.enable('view cache');

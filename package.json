@@ -1,6 +1,6 @@
 {
   "name": "cybe-express",
-  "version": "0.0.2-alpha",
+  "version": "0.0.0-beta",
   "description": "cybe-express a node module inspired by express",
   "main": "index.js",
   "repository": "https://github.com/cybemachine/cybe-express.git",
@@ -12,6 +12,7 @@
     "chalk": "^4.1.2",
     "content-type": "^1.0.4",
     "cookie": "^0.4.1",
+    "etag": "^1.8.1",
     "mime": "^3.0.0",
     "type-is": "^1.6.18"
   },

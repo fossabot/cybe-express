@@ -1,5 +1,6 @@
-var qs = require('../qs');
+var qs = require('../../qs');
 var url = require('node:url');
+var etag = require('etag')
 var contentType = require('content-type');
 
 function compileQueryParser(val) {
