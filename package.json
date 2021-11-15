@@ -5,6 +5,7 @@
   "homepage": "cybemachine.github.io/cybe-express",
   "description": "cybe-express a node module inspired by express",
   "repository": "https://github.com/cybemachine/cybe-express.git",
+  "bugs": "https://github.com/cybemachine/cybe-express/issues",
   "author": {
     "name": "cybemachine",
     "email": "cybemachine142@gmail.com",
